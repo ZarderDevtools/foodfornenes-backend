@@ -1,0 +1,31 @@
+# config/settings/prod.py
+import os
+import dj_database_url
+from .base import *
+
+from dotenv import load_dotenv
+
+# Carga de variables de entorno
+load_dotenv()
+
+
+print("🌐 Using production settings")
+
+DEBUG = False
+LANGUAGE_CODE = "es-es"
+TIME_ZONE = "Europe/Madrid"
+
+ALLOWED_HOSTS = ["foodfornenes.onrender.com", "localhost"]
+CORS_ALLOWED_ORIGINS = ["https://tu-frontend.com"]
+
+DATABASES = {
+    "default": dj_database_url.parse(
+        os.getenv("DATABASE_URL", ""),  # ← aquí pondrás la del Session Pooler en Render
+        conn_max_age=600,
+    )
+}
+
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_HSTS_SECONDS = 31536000
