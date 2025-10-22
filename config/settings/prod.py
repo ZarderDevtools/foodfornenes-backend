@@ -16,7 +16,7 @@ LANGUAGE_CODE = "es-es"
 TIME_ZONE = "Europe/Madrid"
 
 ALLOWED_HOSTS = ["foodfornenes.onrender.com", "localhost"]
-CORS_ALLOWED_ORIGINS = ["https://tu-frontend.com"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
 
 DATABASES = {
     "default": dj_database_url.parse(
