@@ -18,6 +18,13 @@ TIME_ZONE = "Europe/Madrid"
 ALLOWED_HOSTS = ["foodfornenes.onrender.com", "localhost"]
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
 
+INSTALLED_APPS += ["whitenoise.runserver_nostatic"]
+MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
+
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+WHITENOISE_MAX_AGE = 31536000
+
 DATABASES = {
     "default": dj_database_url.parse(
         os.getenv("DATABASE_URL", ""),  # ← aquí pondrás la del Session Pooler en Render
