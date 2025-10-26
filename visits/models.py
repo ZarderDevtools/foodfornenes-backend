@@ -20,7 +20,7 @@ class Visit(models.Model):
     place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name="visits")
     author = models.ForeignKey(UserProfile, on_delete=models.PROTECT, related_name="visits")
 
-    date = models.DateField(default=date.today())  # fecha de la visita
+    date = models.DateField(default=timezone.now)
     rating = models.DecimalField(max_digits=3, decimal_places=1)  # rango 1–10
     price_per_person = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
 
