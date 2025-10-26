@@ -15,8 +15,16 @@ DEBUG = False
 LANGUAGE_CODE = "es-es"
 TIME_ZONE = "Europe/Madrid"
 
-ALLOWED_HOSTS = ["foodfornenes.onrender.com", "localhost"]
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
+ALLOWED_HOSTS = [
+    "foodfornenes.onrender.com",
+    "localhost",
+    "foodfornenes-backend.onrender.com",
+    "127.0.0.1"
+]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "https://foodfornenes-backend.onrender.com"
+]
 
 INSTALLED_APPS += ["whitenoise.runserver_nostatic"]
 MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
