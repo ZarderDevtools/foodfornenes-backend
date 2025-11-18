@@ -94,6 +94,7 @@ REST_FRAMEWORK = {
     # 🔹 Paginación por defecto
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,  # puedes ajustar el número por defecto
+    "EXCEPTION_HANDLER": "rest_framework.views.exception_handler",
 }
 
 
