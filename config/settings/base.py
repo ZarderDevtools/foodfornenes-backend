@@ -99,7 +99,9 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "FoodForNenes API",
+    "DESCRIPTION": "Backend de FoodForNenes",
     "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }
 
 # Password validation

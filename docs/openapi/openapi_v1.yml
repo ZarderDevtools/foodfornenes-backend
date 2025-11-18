@@ -1,0 +1,1955 @@
+openapi: 3.0.3
+info:
+  title: FoodForNenes API
+  version: 1.0.0
+  description: Backend de FoodForNenes
+paths:
+  /api/v1/areas/:
+    get:
+      operationId: api_v1_areas_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAreaList'
+          description: ''
+    post:
+      operationId: api_v1_areas_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Area'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Area'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Area'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Area'
+          description: ''
+  /api/v1/areas/{id}/:
+    get:
+      operationId: api_v1_areas_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este area.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Area'
+          description: ''
+    patch:
+      operationId: api_v1_areas_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este area.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedArea'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedArea'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedArea'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Area'
+          description: ''
+    delete:
+      operationId: api_v1_areas_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este area.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/jwt/create/:
+    post:
+      operationId: api_v1_auth_jwt_create_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/v1/auth/jwt/refresh/:
+    post:
+      operationId: api_v1_auth_jwt_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/v1/foods/:
+    get:
+      operationId: api_v1_foods_list
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - in: query
+        name: name
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFoodList'
+          description: ''
+    post:
+      operationId: api_v1_foods_create
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Food'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Food'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Food'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Food'
+          description: ''
+  /api/v1/foods/{id}/:
+    get:
+      operationId: api_v1_foods_retrieve
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este food.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Food'
+          description: ''
+    patch:
+      operationId: api_v1_foods_partial_update
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este food.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFood'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedFood'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedFood'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Food'
+          description: ''
+    delete:
+      operationId: api_v1_foods_destroy
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este food.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/foods/{id}/latest-by-place/:
+    get:
+      operationId: api_v1_foods_latest_by_place_retrieve
+      description: |-
+        Para el Food {pk}, devuelve la última VisitFood por cada Place.
+        Filtros opcionales: area, place_type, price_range, min_rating
+        Orden: rating_desc (default), price_asc, date_desc
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este food.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Food'
+          description: ''
+  /api/v1/place-types/:
+    get:
+      operationId: api_v1_place_types_list
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - in: query
+        name: name
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPlaceTypeList'
+          description: ''
+    post:
+      operationId: api_v1_place_types_create
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaceType'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PlaceType'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PlaceType'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaceType'
+          description: ''
+  /api/v1/place-types/{id}/:
+    get:
+      operationId: api_v1_place_types_retrieve
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este place type.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaceType'
+          description: ''
+    patch:
+      operationId: api_v1_place_types_partial_update
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este place type.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPlaceType'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPlaceType'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPlaceType'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaceType'
+          description: ''
+    delete:
+      operationId: api_v1_place_types_destroy
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este place type.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/places/:
+    get:
+      operationId: api_v1_places_list
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: query
+        name: area
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: max_avg_price_pp
+        schema:
+          type: number
+      - in: query
+        name: min_avg_rating
+        schema:
+          type: number
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - in: query
+        name: place_type
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: price_range
+        schema:
+          type: string
+          enum:
+          - €
+          - €€
+          - €€€
+          - €€€€
+          - €€€€€
+        description: |-
+          * `€` - €
+          * `€€` - €€
+          * `€€€` - €€€
+          * `€€€€` - €€€€
+          * `€€€€€` - €€€€€
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPlaceList'
+          description: ''
+    post:
+      operationId: api_v1_places_create
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Place'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Place'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Place'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Place'
+          description: ''
+  /api/v1/places/{id}/:
+    get:
+      operationId: api_v1_places_retrieve
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este place.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Place'
+          description: ''
+    patch:
+      operationId: api_v1_places_partial_update
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este place.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPlace'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPlace'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPlace'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Place'
+          description: ''
+    delete:
+      operationId: api_v1_places_destroy
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este place.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/tags/:
+    get:
+      operationId: api_v1_tags_list
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: query
+        name: name
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTagList'
+          description: ''
+    post:
+      operationId: api_v1_tags_create
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Tag'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Tag'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+          description: ''
+  /api/v1/tags/{id}/:
+    get:
+      operationId: api_v1_tags_retrieve
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este tag.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+          description: ''
+    patch:
+      operationId: api_v1_tags_partial_update
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este tag.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTag'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTag'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTag'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+          description: ''
+    delete:
+      operationId: api_v1_tags_destroy
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este tag.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/visit-foods/:
+    get:
+      operationId: api_v1_visit_foods_list
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: food
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: max_price_paid
+        schema:
+          type: number
+      - in: query
+        name: min_rating
+        schema:
+          type: number
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      - in: query
+        name: visit
+        schema:
+          type: string
+          format: uuid
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVisitFoodList'
+          description: ''
+    post:
+      operationId: api_v1_visit_foods_create
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisitFood'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VisitFood'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VisitFood'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VisitFood'
+          description: ''
+  /api/v1/visit-foods/{id}/:
+    get:
+      operationId: api_v1_visit_foods_retrieve
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este visit food.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VisitFood'
+          description: ''
+    patch:
+      operationId: api_v1_visit_foods_partial_update
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este visit food.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVisitFood'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedVisitFood'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedVisitFood'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VisitFood'
+          description: ''
+    delete:
+      operationId: api_v1_visit_foods_destroy
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este visit food.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/visits/:
+    get:
+      operationId: api_v1_visits_list
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: min_rating
+        schema:
+          type: number
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - in: query
+        name: place
+        schema:
+          type: string
+          format: uuid
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVisitList'
+          description: ''
+    post:
+      operationId: api_v1_visits_create
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Visit'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Visit'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Visit'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Visit'
+          description: ''
+  /api/v1/visits/{id}/:
+    get:
+      operationId: api_v1_visits_retrieve
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este visit.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Visit'
+          description: ''
+    patch:
+      operationId: api_v1_visits_partial_update
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este visit.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVisit'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedVisit'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedVisit'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Visit'
+          description: ''
+    delete:
+      operationId: api_v1_visits_destroy
+      description: |-
+        - Filtra por household del usuario.
+        - (Opcional) Incluye filas globales (household=NULL) en lectura si include_global_readonly=True.
+        - Auto-asigna household/author en creaciones.
+        - Bloquea mutaciones sobre filas globales.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este visit.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/visits/create-with-foods/:
+    post:
+      operationId: api_v1_visits_create_with_foods_create
+      description: |-
+        Crea una Visit + varios VisitFood en una sola llamada.
+        Ejemplo body:
+        {
+          "place": "uuid-lugar",
+          "rating": 8.5,
+          "price_per_person": 25.00,
+          "comment": "Muy buena experiencia",
+          "foods": [
+            {"name": "Tarta de queso", "rating": 9.5, "price_paid": 6.5},
+            {"food": "uuid-food-existente", "rating": 8.0}
+          ]
+        }
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Visit'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Visit'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Visit'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Visit'
+          description: ''
+components:
+  schemas:
+    Area:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+    Food:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        household:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 120
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - household
+      - id
+      - name
+      - updated_at
+    PaginatedAreaList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Area'
+    PaginatedFoodList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Food'
+    PaginatedPlaceList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Place'
+    PaginatedPlaceTypeList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlaceType'
+    PaginatedTagList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+    PaginatedVisitFoodList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/VisitFood'
+    PaginatedVisitList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Visit'
+    PatchedArea:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedFood:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        household:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 120
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedPlace:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        household:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        place_type:
+          type: string
+          format: uuid
+        area:
+          type: string
+          format: uuid
+          nullable: true
+        price_range:
+          $ref: '#/components/schemas/PriceRangeEnum'
+        description:
+          type: string
+        url:
+          type: string
+          format: uri
+          maxLength: 200
+        avg_rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        avg_price_pp:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+        visits_count:
+          type: integer
+          readOnly: true
+        last_visit_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+            format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedPlaceType:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 60
+        household:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedTag:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 60
+        household:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedVisit:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        place:
+          type: string
+          format: uuid
+        author:
+          type: string
+          format: uuid
+          readOnly: true
+        date:
+          type: string
+          format: date
+        rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,1})?$
+        price_per_person:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
+          nullable: true
+        comment:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedVisitFood:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        visit:
+          type: string
+          format: uuid
+        food:
+          type: string
+          format: uuid
+        rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,1})?$
+        price_paid:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
+          nullable: true
+        comment:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    Place:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        household:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        place_type:
+          type: string
+          format: uuid
+        area:
+          type: string
+          format: uuid
+          nullable: true
+        price_range:
+          $ref: '#/components/schemas/PriceRangeEnum'
+        description:
+          type: string
+        url:
+          type: string
+          format: uri
+          maxLength: 200
+        avg_rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        avg_price_pp:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+        visits_count:
+          type: integer
+          readOnly: true
+        last_visit_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+            format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - avg_price_pp
+      - avg_rating
+      - created_at
+      - household
+      - id
+      - last_visit_at
+      - name
+      - place_type
+      - tags
+      - updated_at
+      - visits_count
+    PlaceType:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 60
+        household:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - household
+      - id
+      - name
+      - updated_at
+    PriceRangeEnum:
+      enum:
+      - €
+      - €€
+      - €€€
+      - €€€€
+      - €€€€€
+      type: string
+      description: |-
+        * `€` - €
+        * `€€` - €€
+        * `€€€` - €€€
+        * `€€€€` - €€€€
+        * `€€€€€` - €€€€€
+    Tag:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 60
+        household:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - household
+      - id
+      - name
+      - updated_at
+    TokenObtainPair:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - password
+      - refresh
+      - username
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          writeOnly: true
+      required:
+      - access
+      - refresh
+    Visit:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        place:
+          type: string
+          format: uuid
+        author:
+          type: string
+          format: uuid
+          readOnly: true
+        date:
+          type: string
+          format: date
+        rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,1})?$
+        price_per_person:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
+          nullable: true
+        comment:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - author
+      - created_at
+      - id
+      - place
+      - rating
+    VisitFood:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        visit:
+          type: string
+          format: uuid
+        food:
+          type: string
+          format: uuid
+        rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,1})?$
+        price_paid:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
+          nullable: true
+        comment:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - food
+      - id
+      - rating
+      - visit
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
