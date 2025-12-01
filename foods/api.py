@@ -170,3 +170,6 @@ class VisitFoodViewSet(HouseholdScopedViewSet):
     serializer_class = VisitFoodSerializer
     filterset_class = VisitFoodFilter
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
+
+    search_fields = ["food__name", "visit__place__name", "comment"]
+    ordering_fields = ["created_at", "rating", "price_paid"]

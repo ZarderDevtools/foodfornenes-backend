@@ -3,6 +3,7 @@ from django.urls import path, include
 from django.http import HttpResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.schemas import get_schema_view
+from core.health import healthcheck
 
 def healthz(_request):  # 200 OK
     return HttpResponse("ok", content_type="text/plain")
@@ -33,4 +34,5 @@ urlpatterns = [
 
 # Version 1
     path("api/v1/", include("config.v1_urls")),
+    path("healthz/", healthcheck),
 ]

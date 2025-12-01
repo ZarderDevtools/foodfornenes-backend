@@ -100,6 +100,9 @@ class VisitViewSet(HouseholdScopedViewSet):
     filterset_class = VisitFilter
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
 
+    search_fields = ["place__name", "comment"]  # buscar por nombre del sitio o comentario
+    ordering_fields = ["date", "created_at", "rating", "price_per_person"]
+
     @action(detail=False, methods=["post"], url_path="create-with-foods")
     @transaction.atomic
     def create_with_foods(self, request):
