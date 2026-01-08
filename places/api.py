@@ -42,13 +42,24 @@ class PlaceSerializer(serializers.ModelSerializer):
         return attrs
 
 
+# NUEVO: filtro tipo IN para strings (permite ?price_range_in=€,€€)
+class CharInFilter(filters.BaseInFilter, filters.CharFilter):
+    pass
+
+
 class PlaceFilter(filters.FilterSet):
     min_avg_rating = filters.NumberFilter(field_name="avg_rating", lookup_expr="gte")
     max_avg_price_pp = filters.NumberFilter(field_name="avg_price_pp", lookup_expr="lte")
 
+    # NUEVO: multi selección de precio (IN)
+    # Uso: ?price_range_in=€,€€ (separado por comas)
+    price_range_in = CharInFilter(field_name="price_range", lookup_expr="in")
+
     class Meta:
         model = Place
-        fields = ["place_type", "area", "price_range", "min_avg_rating", "max_avg_price_pp"]
+        # Mantenemos price_range para el caso “uno solo”
+        # Añadimos price_range_in para el caso “varios”
+        fields = ["place_type", "area", "price_range", "price_range_in", "min_avg_rating", "max_avg_price_pp"]
 
 
 class PlaceViewSet(HouseholdScopedViewSet):
