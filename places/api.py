@@ -12,7 +12,7 @@ from .models import Place, PlaceTag
 class PlaceSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=200, validators=[validate_non_blank_trimmed])
 
-    @extend_schema_field(serializers.ListField(child=serializers.UUIDField()))
+    @extend_schema_field(serializers.UUIDField())
     class TagsField(serializers.PrimaryKeyRelatedField):
         pass
 
