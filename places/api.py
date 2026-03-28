@@ -1,7 +1,8 @@
 # places/api.py
 from django.db import transaction
 from django_filters import rest_framework as filters
-from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.utils import extend_schema_field, extend_schema, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 from rest_framework import serializers
 
 from core.api import HouseholdScopedViewSet
@@ -44,11 +45,6 @@ class BasePlaceSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, attrs):
-        """
-        Validaciones de scope:
-        - place_type debe ser global (household=None) o del mismo household del usuario
-        - tags deben ser del mismo household del usuario
-        """
         request = self.context.get("request")
         if not request or not hasattr(request.user, "profile"):
             return attrs
@@ -82,10 +78,6 @@ class BasePlaceSerializer(serializers.ModelSerializer):
         return attrs
 
     def _sync_tags(self, place: Place, tags) -> None:
-        """
-        Sincroniza la tabla intermedia PlaceTag para que el Place tenga exactamente
-        los tags recibidos.
-        """
         desired_tag_ids = {tag.pk for tag in tags}
         current_tag_ids = set(
             PlaceTag.objects.filter(place=place).values_list("tag_id", flat=True)
@@ -105,23 +97,17 @@ class BasePlaceSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def create(self, validated_data):
         tags = validated_data.pop("tags", None)
-
         place = super().create(validated_data)
-
         if tags is not None:
             self._sync_tags(place, tags)
-
         return place
 
     @transaction.atomic
     def update(self, instance, validated_data):
         tags = validated_data.pop("tags", None)
-
         place = super().update(instance, validated_data)
-
         if tags is not None:
             self._sync_tags(place, tags)
-
         return place
 
 
@@ -146,10 +132,24 @@ class CharInFilter(filters.BaseInFilter, filters.CharFilter):
     pass
 
 
+class UUIDInFilter(filters.BaseInFilter, filters.UUIDFilter):
+    pass
+
+
 class PlaceFilter(filters.FilterSet):
     min_avg_rating = filters.NumberFilter(field_name="avg_rating", lookup_expr="gte")
     max_avg_price_pp = filters.NumberFilter(field_name="avg_price_pp", lookup_expr="lte")
     price_range_in = CharInFilter(field_name="price_range", lookup_expr="in")
+
+    tags = UUIDInFilter(
+        method="filter_tags",
+        help_text="Filtrar por uno o varios tags (UUID separados por comas). Ej: tags=uuid1,uuid2"
+    )
+
+    def filter_tags(self, queryset, name, value):
+        if not value:
+            return queryset
+        return queryset.filter(tags__id__in=value).distinct()
 
     class Meta:
         model = Place
@@ -160,6 +160,7 @@ class PlaceFilter(filters.FilterSet):
             "price_range_in",
             "min_avg_rating",
             "max_avg_price_pp",
+            "tags",
         ]
 
 
@@ -175,3 +176,18 @@ class PlaceViewSet(HouseholdScopedViewSet):
         if self.action in ["list", "retrieve"]:
             return PlaceReadSerializer
         return PlaceWriteSerializer
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="tags",
+                type=OpenApiTypes.UUID,
+                location=OpenApiParameter.QUERY,
+                description="Filtrar por uno o varios tags (separados por comas). Ej: tags=uuid1,uuid2",
+                required=False,
+                many=True,
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
