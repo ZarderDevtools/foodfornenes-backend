@@ -1,3 +1,4 @@
+# places/api.py
 from django.db import transaction
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema_field
@@ -5,23 +6,13 @@ from rest_framework import serializers
 
 from core.api import HouseholdScopedViewSet
 from core.validators import validate_non_blank_trimmed
-from categorization.models import PlaceType, Tag
+from categorization.api import TagSerializer
+from categorization.models import Tag
 from .models import Place, PlaceTag
 
 
-class PlaceSerializer(serializers.ModelSerializer):
+class BasePlaceSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=200, validators=[validate_non_blank_trimmed])
-
-    @extend_schema_field(serializers.UUIDField())
-    class TagsField(serializers.PrimaryKeyRelatedField):
-        pass
-
-    tags = TagsField(
-        many=True,
-        queryset=Tag.objects.all(),
-        required=False,
-        help_text="Lista de IDs de tags",
-    )
 
     class Meta:
         model = Place
@@ -56,7 +47,7 @@ class PlaceSerializer(serializers.ModelSerializer):
         """
         Validaciones de scope:
         - place_type debe ser global (household=None) o del mismo household del usuario
-        - tags deben ser globales (household=None) o del mismo household del usuario
+        - tags deben ser del mismo household del usuario
         """
         request = self.context.get("request")
         if not request or not hasattr(request.user, "profile"):
@@ -69,7 +60,7 @@ class PlaceSerializer(serializers.ModelSerializer):
             if hasattr(place_type, "household_id"):
                 if place_type.household_id is not None and place_type.household_id != user_hh_id:
                     raise serializers.ValidationError({
-                        "place_type": "El tipo de lugar no pertenece a tu household (ni es global)."
+                        "place_type": "El tipo de lugar no pertenece a tu household."
                     })
 
         tags = attrs.get("tags")
@@ -77,13 +68,13 @@ class PlaceSerializer(serializers.ModelSerializer):
             invalid_tags = []
             for tag in tags:
                 if hasattr(tag, "household_id"):
-                    if tag.household_id is not None and tag.household_id != user_hh_id:
+                    if tag.household_id != user_hh_id:
                         invalid_tags.append(str(tag.pk))
 
             if invalid_tags:
                 raise serializers.ValidationError({
                     "tags": (
-                        "Uno o más tags no pertenecen a tu household (ni son globales). "
+                        "Uno o más tags no pertenecen a tu household. "
                         f"Tags inválidos: {', '.join(invalid_tags)}"
                     )
                 })
@@ -134,6 +125,23 @@ class PlaceSerializer(serializers.ModelSerializer):
         return place
 
 
+class PlaceWriteSerializer(BasePlaceSerializer):
+    @extend_schema_field(serializers.UUIDField())
+    class TagsField(serializers.PrimaryKeyRelatedField):
+        pass
+
+    tags = TagsField(
+        many=True,
+        queryset=Tag.objects.all(),
+        required=False,
+        help_text="Lista de IDs de tags",
+    )
+
+
+class PlaceReadSerializer(BasePlaceSerializer):
+    tags = TagSerializer(many=True, read_only=True)
+
+
 class CharInFilter(filters.BaseInFilter, filters.CharFilter):
     pass
 
@@ -157,9 +165,13 @@ class PlaceFilter(filters.FilterSet):
 
 class PlaceViewSet(HouseholdScopedViewSet):
     queryset = Place.objects.all().order_by("-last_visit_at", "name")
-    serializer_class = PlaceSerializer
     filterset_class = PlaceFilter
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
 
     search_fields = ["name"]
     ordering_fields = ["avg_rating", "avg_price_pp", "last_visit_at", "name"]
+
+    def get_serializer_class(self):
+        if self.action in ["list", "retrieve"]:
+            return PlaceReadSerializer
+        return PlaceWriteSerializer

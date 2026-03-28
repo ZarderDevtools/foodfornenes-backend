@@ -1,3 +1,4 @@
+# categorization/api.py
 from rest_framework import serializers
 from django_filters import rest_framework as filters
 from core.api import HouseholdScopedViewSet
