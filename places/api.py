@@ -9,6 +9,7 @@ from core.api import HouseholdScopedViewSet
 from core.validators import validate_non_blank_trimmed
 from categorization.api import TagSerializer
 from categorization.models import Tag
+from locations.api import AreaSerializer
 from .models import Place, PlaceTag
 
 
@@ -126,6 +127,7 @@ class PlaceWriteSerializer(BasePlaceSerializer):
 
 class PlaceReadSerializer(BasePlaceSerializer):
     tags = TagSerializer(many=True, read_only=True)
+    area = AreaSerializer(read_only=True)
 
 
 class CharInFilter(filters.BaseInFilter, filters.CharFilter):
@@ -140,6 +142,12 @@ class PlaceFilter(filters.FilterSet):
     min_avg_rating = filters.NumberFilter(field_name="avg_rating", lookup_expr="gte")
     max_avg_price_pp = filters.NumberFilter(field_name="avg_price_pp", lookup_expr="lte")
     price_range_in = CharInFilter(field_name="price_range", lookup_expr="in")
+
+    area = UUIDInFilter(
+        field_name="area",
+        lookup_expr="in",
+        help_text="Filtrar por una o varias áreas (UUID separados por comas). Ej: area=uuid1,uuid2"
+    )
 
     tags = UUIDInFilter(
         method="filter_tags",
@@ -180,13 +188,21 @@ class PlaceViewSet(HouseholdScopedViewSet):
     @extend_schema(
         parameters=[
             OpenApiParameter(
+                name="area",
+                type=OpenApiTypes.UUID,
+                location=OpenApiParameter.QUERY,
+                description="Filtrar por una o varias áreas (separadas por comas). Ej: area=uuid1,uuid2",
+                required=False,
+                many=True,
+            ),
+            OpenApiParameter(
                 name="tags",
                 type=OpenApiTypes.UUID,
                 location=OpenApiParameter.QUERY,
                 description="Filtrar por uno o varios tags (separados por comas). Ej: tags=uuid1,uuid2",
                 required=False,
                 many=True,
-            )
+            ),
         ]
     )
     def list(self, request, *args, **kwargs):
